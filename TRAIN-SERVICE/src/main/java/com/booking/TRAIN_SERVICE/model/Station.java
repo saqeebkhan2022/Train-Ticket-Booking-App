@@ -3,6 +3,7 @@ package com.booking.TRAIN_SERVICE.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
@@ -12,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Builder
 @Table(name = "stations")
-public class Station {
+public class Station implements Serializable {
 
     @Id
     private String id;

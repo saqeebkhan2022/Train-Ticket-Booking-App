@@ -1,11 +1,15 @@
 package com.booking.TRAIN_SERVICE.controller;
 
+import com.booking.TRAIN_SERVICE.enums.CoachType;
 import com.booking.TRAIN_SERVICE.model.Train;
+import com.booking.TRAIN_SERVICE.request.TrainSearchRequest;
 import com.booking.TRAIN_SERVICE.services.TrainService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -20,10 +24,23 @@ public class TrainController {
         return ResponseEntity.ok(trainService.getTrainByNumber(trainNumber));
     }
 
+//    @GetMapping("")
+//    public ResponseEntity<List<Train>> searchTrains(@RequestParam String name) {
+//        return ResponseEntity.ok(trainService.getTrainsByName(name));
+//    }
+
     @GetMapping("/search")
-    public ResponseEntity<List<Train>> searchTrains(@RequestParam String name) {
-        return ResponseEntity.ok(trainService.getTrainsByName(name));
+    public List<Train> searchTrains(
+            @RequestParam String fromStationCode,
+            @RequestParam String toStationCode,
+            @RequestParam LocalDate dateOfJourney,
+            @RequestParam CoachType coachType) {
+        // Create the TrainSearchRequest object and pass it to the service
+        TrainSearchRequest searchRequest = new TrainSearchRequest(fromStationCode, toStationCode, dateOfJourney, coachType);
+        return trainService.searchTrain(searchRequest);
     }
+
+
 
     @GetMapping
     public ResponseEntity<List<Train>> getAllTrains() {

@@ -3,6 +3,7 @@ package com.booking.TRAIN_SERVICE;
 import com.booking.TRAIN_SERVICE.enums.CoachType;
 import com.booking.TRAIN_SERVICE.enums.SeatCategory;
 import com.booking.TRAIN_SERVICE.enums.SeatType;
+import com.booking.TRAIN_SERVICE.enums.TrainType;
 import com.booking.TRAIN_SERVICE.model.*;
 import com.booking.TRAIN_SERVICE.repository.*;
 import jakarta.transaction.Transactional;
@@ -10,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -119,6 +120,7 @@ public class TrainServiceApplication implements CommandLineRunner {
 				.trainNumber("20839")
 				.trainName("New Delhi Rajdhani Express")
 				.totalCoaches(6)
+				.trainType(TrainType.RAJDHANI)
 				.build();
 		Train savedTrain = trainRepository.save(train);
 
@@ -180,7 +182,7 @@ public class TrainServiceApplication implements CommandLineRunner {
 				.seatNumber("1")
 				.coach(coach)
 				.seatType(SeatType.LOWER)
-				.seatCategory(SeatCategory.NORMAL)
+				.seatCategory(SeatCategory.GENERAL)
 				.isBooked(false)
 				.normalFare(4000)
 				.tatkalFare(4500)
@@ -192,7 +194,7 @@ public class TrainServiceApplication implements CommandLineRunner {
 				.seatNumber("2")
 				.coach(coach)
 				.seatType(SeatType.UPPER)
-				.seatCategory(SeatCategory.NORMAL)
+				.seatCategory(SeatCategory.GENERAL)
 				.isBooked(false)
 				.normalFare(4000)
 				.tatkalFare(4500)
@@ -247,7 +249,7 @@ public class TrainServiceApplication implements CommandLineRunner {
 //
 //		// Step 5: Add Train Station Mapping (Stops)
 //
-		List<String> list = Arrays.asList("Mon","Tue","Wed","Thu","Fri","Sat");
+		List<String> list = Arrays.asList("Mon","Tue","Wed","Thu","Fri");
 		TrainStationMapping stationMapping1 = TrainStationMapping.builder()
 				.id(UUID.randomUUID().toString())
 				.train(train)

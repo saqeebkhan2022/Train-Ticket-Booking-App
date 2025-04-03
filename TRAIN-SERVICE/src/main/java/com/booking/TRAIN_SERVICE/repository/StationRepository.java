@@ -9,4 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface StationRepository extends JpaRepository<Station, String> {
+    Station findByStationCode(String from);
 }

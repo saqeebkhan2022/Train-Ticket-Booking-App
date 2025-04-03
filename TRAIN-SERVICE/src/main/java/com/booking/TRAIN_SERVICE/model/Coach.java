@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
@@ -16,13 +17,13 @@ import java.util.List;
 @Entity
 @Builder
 @Table(name = "coaches")
-public class Coach {
+public class Coach implements Serializable {
 
     @Id
     private String id;
     @ManyToOne
     @JoinColumn(name = "train_id",nullable = false)
-    @JsonBackReference
+    @JsonBackReference("train")
     private Train train;
     @Column(nullable = false)
     private String coachNumber;
@@ -35,7 +36,5 @@ public class Coach {
     public  long getAvailableSeats(){
         return seats.stream().filter(seat -> !seat.isBooked()).count();
     }
-
-
 
 }
