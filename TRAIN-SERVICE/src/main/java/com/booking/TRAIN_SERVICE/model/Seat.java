@@ -2,6 +2,7 @@ package com.booking.TRAIN_SERVICE.model;
 
 import com.booking.TRAIN_SERVICE.enums.CoachType;
 import com.booking.TRAIN_SERVICE.enums.SeatCategory;
+import com.booking.TRAIN_SERVICE.enums.SeatStatus;
 import com.booking.TRAIN_SERVICE.enums.SeatType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -34,12 +35,18 @@ public class Seat {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SeatCategory seatCategory;
+    private int totalAvailablePremiumTatkal;
     private double normalFare;
     private double tatkalFare;
     private double premiumTatkalFare;
     @Column(nullable = false)
     private boolean isBooked;
     private boolean isTatkalAvailable;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SeatStatus seatStatus;
+    private int generalWaitlist;  // Track WL count for General quota
+    private int tatkalWaitlist;
     @Version
     private int version;
 
@@ -71,5 +78,22 @@ public class Seat {
         return calendar.getTime();
     }
 
+
+    public int getWaitlistForCategory(SeatCategory category) {
+        if (category == SeatCategory.GENERAL) {
+            return generalWaitlist;
+        } else if (category == SeatCategory.TATKAL) {
+            return tatkalWaitlist;
+        }
+        return 0;
+    }
+
+    public void incrementWaitlist(SeatCategory category) {
+        if (category == SeatCategory.GENERAL) {
+            generalWaitlist++;
+        } else if (category == SeatCategory.TATKAL) {
+            tatkalWaitlist++;
+        }
+    }
 
 }

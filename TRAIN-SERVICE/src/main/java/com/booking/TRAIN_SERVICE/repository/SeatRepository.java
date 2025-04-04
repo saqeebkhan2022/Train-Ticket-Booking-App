@@ -4,10 +4,11 @@ import com.booking.TRAIN_SERVICE.enums.CoachType;
 import com.booking.TRAIN_SERVICE.model.Seat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, String> {
@@ -31,5 +32,20 @@ public interface SeatRepository extends JpaRepository<Seat, String> {
 
     @Query("SELECT s FROM Seat s WHERE s.isBooked = false AND s.coach.coachType = :coachType")
     List<Seat> findAvailableSeatsByCoachType(CoachType coachType);
+
+    // Find an available seat based on trainId, coachType, and isBooked status
+
+    @Query("SELECT s FROM Seat s " +
+            "JOIN s.coach c " +
+            "JOIN c.train t " +
+            "WHERE t.id = :trainId " +  // Filter by trainId
+            "AND c.coachType = :coachType " +  // Filter by coachType
+            "AND s.isBooked = :isBooked")  // Filter by booking status
+    Seat findAvailableSeat(
+            @Param("trainId") String trainId,
+            @Param("coachType") CoachType coachType,
+            @Param("isBooked") boolean isBooked
+    );
+
 
 }

@@ -1,5 +1,8 @@
 package com.booking.TRAIN_SERVICE.services.IMPL;
 
+import com.booking.TRAIN_SERVICE.enums.CoachType;
+import com.booking.TRAIN_SERVICE.enums.SeatStatus;
+import com.booking.TRAIN_SERVICE.model.Coach;
 import com.booking.TRAIN_SERVICE.model.Station;
 import com.booking.TRAIN_SERVICE.model.Train;
 import com.booking.TRAIN_SERVICE.repository.StationRepository;
@@ -10,7 +13,12 @@ import com.booking.TRAIN_SERVICE.uitls.DateUtility;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -55,17 +63,56 @@ public class TrainServiceImpl implements TrainService {
         trainRepository.deleteById(trainId);
     }
 
+
     @Override
-    public List<Train> searchTrain(TrainSearchRequest trainSearchRequest) {
+    public Page<Train> searchTrain(TrainSearchRequest trainSearchRequest, Pageable pageable) {
         String dayOfWeek = trainSearchRequest.getDateOfJourney().getDayOfWeek()
                 .getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-        return trainRepository.findTrains(
+
+        // Delegate the paged search to the repository
+        Page<Train> trainsPage = trainRepository.findTrains(
                 trainSearchRequest.getFromStationCode(),
                 trainSearchRequest.getToStationCode(),
                 dayOfWeek,
-                trainSearchRequest.getCoachType()
+                trainSearchRequest.getCoachType(),
+                trainSearchRequest.getSeatCategory(),
+                pageable
         );
+
+        // Process the results to include seat status (available and waiting list seats)
+        for (Train train : trainsPage) {
+            for (Coach coach : train.getCoaches()) {
+                // Get available seats and waiting list seats
+                long availableSeats = coach.getSeats().stream()
+                        .filter(seat -> seat.getSeatStatus() == SeatStatus.AVAILABLE && !seat.isBooked())
+                        .count();
+
+                long waitingListSeats = coach.getSeats().stream()
+                        .filter(seat -> seat.getSeatStatus() == SeatStatus.WAITING)
+                        .count();
+
+                // Calculate general and tatkal waitlist counts
+                int generalWaitlistCount = coach.getGeneralWaitlistCount();
+                int tatkalWaitlistCount = coach.getTatkalWaitlistCount();
+
+                // Prepare the seat status message
+                String seatStatus = "Available " + availableSeats + " WL " + waitingListSeats;
+                String waitlistStatus = "General WL: " + generalWaitlistCount + " Tatkal WL: " + tatkalWaitlistCount;
+
+                // Print or log the seat status and waitlist information
+                System.out.println("Train: " + train.getTrainNumber() + " - Coach: " + coach.getCoachNumber());
+                System.out.println("Seat Status: " + seatStatus);
+                System.out.println("Waitlist Status: " + waitlistStatus);
+            }
+        }
+
+        return trainsPage;
     }
+
+
+
+
+
 
 
 }

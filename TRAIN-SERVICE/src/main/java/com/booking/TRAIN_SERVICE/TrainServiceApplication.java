@@ -1,9 +1,6 @@
 package com.booking.TRAIN_SERVICE;
 
-import com.booking.TRAIN_SERVICE.enums.CoachType;
-import com.booking.TRAIN_SERVICE.enums.SeatCategory;
-import com.booking.TRAIN_SERVICE.enums.SeatType;
-import com.booking.TRAIN_SERVICE.enums.TrainType;
+import com.booking.TRAIN_SERVICE.enums.*;
 import com.booking.TRAIN_SERVICE.model.*;
 import com.booking.TRAIN_SERVICE.repository.*;
 import jakarta.transaction.Transactional;
@@ -48,8 +45,7 @@ public class TrainServiceApplication implements CommandLineRunner {
 	}
 
 	private void addDemoData() {
-
-		// Step 1: Add Stations
+		// Step 1: Add 10 Stations
 		Station station1 = Station.builder()
 				.id(UUID.randomUUID().toString())
 				.stationCode("RNC")
@@ -78,7 +74,6 @@ public class TrainServiceApplication implements CommandLineRunner {
 				.city("Gaya")
 				.state("Bihar")
 				.build();
-
 		Station station5 = Station.builder()
 				.id(UUID.randomUUID().toString())
 				.stationCode("DOS")
@@ -86,7 +81,6 @@ public class TrainServiceApplication implements CommandLineRunner {
 				.city("Dehri")
 				.state("Bihar")
 				.build();
-
 		Station station6 = Station.builder()
 				.id(UUID.randomUUID().toString())
 				.stationCode("DDU")
@@ -94,7 +88,6 @@ public class TrainServiceApplication implements CommandLineRunner {
 				.city("Mughalsarai")
 				.state("Uttar Pradesh")
 				.build();
-
 		Station station7 = Station.builder()
 				.id(UUID.randomUUID().toString())
 				.stationCode("CNB")
@@ -102,8 +95,6 @@ public class TrainServiceApplication implements CommandLineRunner {
 				.city("Kanpur")
 				.state("Uttar Pradesh")
 				.build();
-
-
 		Station station8 = Station.builder()
 				.id(UUID.randomUUID().toString())
 				.stationCode("NDLS")
@@ -111,214 +102,95 @@ public class TrainServiceApplication implements CommandLineRunner {
 				.city("New Delhi")
 				.state("Delhi")
 				.build();
-
-		stationRepository.saveAll(List.of(station1, station2,station3,station4,station5,station6,station7,station8));
-
-		// Step 2: Add Train
-		Train train = Train.builder()
+		Station station9 = Station.builder()
 				.id(UUID.randomUUID().toString())
-				.trainNumber("20839")
-				.trainName("New Delhi Rajdhani Express")
-				.totalCoaches(6)
-				.trainType(TrainType.RAJDHANI)
+				.stationCode("BPL")
+				.stationName("Bhopal Junction")
+				.city("Bhopal")
+				.state("Madhya Pradesh")
 				.build();
-		Train savedTrain = trainRepository.save(train);
-
-
-		// Step 3: Add Coaches
-		Coach coach = Coach.builder()
+		Station station10 = Station.builder()
 				.id(UUID.randomUUID().toString())
-				.coachNumber("H1")
-				.coachType(CoachType.FIRST_AC)
-				.train(savedTrain)
+				.stationCode("AGC")
+				.stationName("Agra Cantt.")
+				.city("Agra")
+				.state("Uttar Pradesh")
 				.build();
 
-		Coach coach1 = Coach.builder()
-				.id(UUID.randomUUID().toString())
-				.coachNumber("A1")
-				.coachType(CoachType.SECOND_AC)
-				.train(savedTrain)
-				.build();
+		stationRepository.saveAll(List.of(station1, station2, station3, station4, station5, station6, station7, station8, station9, station10));
 
-		Coach coach2 = Coach.builder()
-				.id(UUID.randomUUID().toString())
-				.coachNumber("A2")
-				.coachType(CoachType.SECOND_AC)
-				.train(savedTrain)
-				.build();
+		// Step 2: Add 10 Trains
+		for (int i = 1; i <= 10; i++) {
+			Train train = Train.builder()
+					.id(UUID.randomUUID().toString())
+					.trainNumber("2083" + i)
+					.trainName("Train " + i)
+					.totalCoaches(6)
+					.trainType(TrainType.RAJDHANI) // Example, you can change this as needed
+					.build();
+			trainRepository.save(train);
+		}
 
-		Coach coach3 = Coach.builder()
-				.id(UUID.randomUUID().toString())
-				.coachNumber("B1")
-				.coachType(CoachType.THIRD_AC)
-				.train(savedTrain)
-				.build();
+		// Step 3: Add Coaches for each Train
+		List<Train> trains = trainRepository.findAll();
+		for (Train train : trains) {
+			for (int i = 1; i <= 6; i++) {
+				Coach coach = Coach.builder()
+						.id(UUID.randomUUID().toString())
+						.coachNumber("Coach-" + i)
+						.coachType(i % 2 == 0 ? CoachType.FIRST_AC : CoachType.SECOND_AC) // Alternating coach types
+						.train(train)
+						.totalAvailableTatkal(55)
+						.totalAvailableNormal(200)
+						.build();
+				coachRepository.save(coach);
+			}
+		}
 
-		Coach coach4 = Coach.builder()
-				.id(UUID.randomUUID().toString())
-				.coachNumber("B2")
-				.coachType(CoachType.THIRD_AC)
-				.train(savedTrain)
-				.build();
+		// Step 4: Add Seats for Coaches
+		List<Coach> coaches = coachRepository.findAll();
+		for (Coach coach : coaches) {
+			for (int i = 1; i <= 5; i++) {
+				Seat seat = Seat.builder()
+						.id(UUID.randomUUID().toString())
+						.seatNumber(String.valueOf(i))
+						.coach(coach)
+						.seatType(i % 2 == 0 ? SeatType.UPPER : SeatType.LOWER) // Alternating seat types
+						.seatCategory(SeatCategory.GENERAL)
+						.isBooked(false)
+						.generalWaitlist(0)
+						.tatkalWaitlist(0)
+						.normalFare(4000)
+						.seatStatus(SeatStatus.AVAILABLE)
+						.tatkalFare(4500)
+						.premiumTatkalFare(4800)
+						.isTatkalAvailable(true)
+						.build();
+				seatRepository.save(seat);
+			}
+		}
 
-		Coach coach5 = Coach.builder()
-				.id(UUID.randomUUID().toString())
-				.coachNumber("B3")
-				.coachType(CoachType.THIRD_AC)
-				.train(savedTrain)
-				.build();
+		// Step 5: Add Train Station Mappings (Stops)
+		List<Train> allTrains = trainRepository.findAll();
+		List<Station> allStations = stationRepository.findAll();
+		List<String> list = Arrays.asList("Mon", "Tue", "Wed", "Thu", "Fri");
 
-		Coach coach6 = Coach.builder()
-				.id(UUID.randomUUID().toString())
-				.coachNumber("B4")
-				.coachType(CoachType.THIRD_AC)
-				.train(savedTrain)
-				.build();
-		List<Coach> coaches = coachRepository.saveAll(List.of(coach, coach1, coach2, coach3, coach4, coach5, coach6));
-//
-//		// Step 4: Add Seats
-		Seat seat1 = Seat.builder()
-				.id(UUID.randomUUID().toString())
-				.seatNumber("1")
-				.coach(coach)
-				.seatType(SeatType.LOWER)
-				.seatCategory(SeatCategory.GENERAL)
-				.isBooked(false)
-				.normalFare(4000)
-				.tatkalFare(4500)
-				.premiumTatkalFare(4800)
-				.isTatkalAvailable(true)
-				.build();
-		Seat seat2 = Seat.builder()
-				.id(UUID.randomUUID().toString())
-				.seatNumber("2")
-				.coach(coach)
-				.seatType(SeatType.UPPER)
-				.seatCategory(SeatCategory.GENERAL)
-				.isBooked(false)
-				.normalFare(4000)
-				.tatkalFare(4500)
-				.premiumTatkalFare(4800)
-				.isTatkalAvailable(true)
-				.build();
+		for (Train train : allTrains) {
+			for (Station station : allStations) {
+				TrainStationMapping stationMapping = TrainStationMapping.builder()
+						.id(UUID.randomUUID().toString())
+						.train(train)
+						.station(station)
+						.arrivalTime(LocalTime.of(18, 0))
+						.departureTime(LocalTime.of(18, 30)) // Adding 30 minutes for departure
+						.runningOn(list)
+						.build();
+				trainStationMappingRepository.save(stationMapping);
+			}
+		}
 
-		Seat seat3 = Seat.builder()
-				.id(UUID.randomUUID().toString())
-				.seatNumber("3")
-				.coach(coach)
-				.seatType(SeatType.LOWER)
-				.seatCategory(SeatCategory.TATKAL)
-				.isBooked(false)
-				.normalFare(4000)
-				.tatkalFare(4500)
-				.premiumTatkalFare(4800)
-				.isTatkalAvailable(true)
-				.build();
-
-		Seat seat4 = Seat.builder()
-				.id(UUID.randomUUID().toString())
-				.seatNumber("4")
-				.coach(coach)
-				.seatType(SeatType.UPPER)
-				.seatCategory(SeatCategory.PERMIUM_TATKAL)
-				.isBooked(false)
-				.normalFare(4000)
-				.tatkalFare(4500)
-				.premiumTatkalFare(4800)
-				.isTatkalAvailable(true)
-				.build();
-
-		Seat seat5 = Seat.builder()
-				.id(UUID.randomUUID().toString())
-				.seatNumber("5")
-				.coach(coach)
-				.seatType(SeatType.LOWER)
-				.seatCategory(SeatCategory.TATKAL)
-				.isBooked(false)
-				.normalFare(4000)
-				.tatkalFare(4500)
-				.premiumTatkalFare(4800)
-				.isTatkalAvailable(true)
-				.build();
-
-		seatRepository.save(seat1);
-		seatRepository.save(seat2);
-		seatRepository.save(seat3);
-		seatRepository.save(seat4);
-		seatRepository.save(seat5);
-//
-//		// Step 5: Add Train Station Mapping (Stops)
-//
-		List<String> list = Arrays.asList("Mon","Tue","Wed","Thu","Fri");
-		TrainStationMapping stationMapping1 = TrainStationMapping.builder()
-				.id(UUID.randomUUID().toString())
-				.train(train)
-				.station(station1)
-				.arrivalTime(LocalTime.of(18, 0))
-				.departureTime(LocalTime.of(18, 0))
-				.runningOn(list)
-				.build();
-
-		TrainStationMapping stationMapping2 = TrainStationMapping.builder()
-				.id(UUID.randomUUID().toString())
-				.train(train)
-				.station(station2)
-				.arrivalTime(LocalTime.of(18, 0))
-				.departureTime(LocalTime.of(18, 0))
-				.runningOn(list)
-				.build();
-		TrainStationMapping stationMapping3 = TrainStationMapping.builder()
-				.id(UUID.randomUUID().toString())
-				.train(train)
-				.station(station3)
-				.arrivalTime(LocalTime.of(18, 0))
-				.departureTime(LocalTime.of(18, 0))
-				.runningOn(list)
-				.build();
-		TrainStationMapping stationMapping4 = TrainStationMapping.builder()
-				.id(UUID.randomUUID().toString())
-				.train(train)
-				.station(station4)
-				.arrivalTime(LocalTime.of(18, 0))
-				.departureTime(LocalTime.of(18, 0))
-				.runningOn(list)
-				.build();
-		TrainStationMapping stationMapping5 = TrainStationMapping.builder()
-				.id(UUID.randomUUID().toString())
-				.train(train)
-				.station(station5)
-				.arrivalTime(LocalTime.of(18, 0))
-				.departureTime(LocalTime.of(18, 0))
-				.runningOn(list)
-				.build();
-		TrainStationMapping stationMapping6 = TrainStationMapping.builder()
-				.id(UUID.randomUUID().toString())
-				.train(train)
-				.station(station6)
-				.arrivalTime(LocalTime.of(18, 0))
-				.departureTime(LocalTime.of(18, 0))
-				.runningOn(list)
-				.build();
-		TrainStationMapping stationMapping7 = TrainStationMapping.builder()
-				.id(UUID.randomUUID().toString())
-				.train(train)
-				.station(station7)
-				.arrivalTime(LocalTime.of(18, 0))
-				.departureTime(LocalTime.of(18, 0))
-				.runningOn(list)
-				.build();
-		TrainStationMapping stationMapping8 = TrainStationMapping.builder()
-				.id(UUID.randomUUID().toString())
-				.train(train)
-				.station(station8)
-				.arrivalTime(LocalTime.of(18, 0))
-				.departureTime(LocalTime.of(18, 0))
-				.runningOn(list)
-				.build();
-
-		trainStationMappingRepository.saveAll(List.of(stationMapping1,stationMapping2,stationMapping3,stationMapping4,stationMapping5,stationMapping6,stationMapping7,stationMapping8));
-
-		System.out.println("🚆 Demo Data Added: Rajdhani Express from Ranchi to New Delhi ✅");
+		System.out.println("🚆 Demo Data Added: 10 trains with stations, coaches, seats, and mappings ✅");
 	}
+
 
 }
